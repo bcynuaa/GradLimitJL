@@ -133,29 +133,16 @@ function createSquareBoundary(
     );
 end
 
-const gauss_points::Vector{Float64} = [-1/sqrt(3), 1/sqrt(3)] ./ 2 .+ 1/2;
-const gauss_weights::Vector{Float64} = [1., 1.] ./ 2;
-
-function integrateForJ(
-    x, y,
-    x_1, y_1,
-    x_2, y_2,
-)::Float64
-    # integrate for 1/r^2 for r = distance(x, y, xi, eta)
-    # x, y: point to evaluate
-    # x_1, y_1: start point of line segment
-    # x_2, y_2: end point of line segment
-    dr::Vector{Float64} = [x_2 - x_1, y_2 - y_1];
-    r_at_gauss_points::Matrix{Float64} = [x_1, y_1]' .+ gauss_points .* dr';
-    r_to_node_xy::Matrix{Float64} = r_at_gauss_points .- [x, y]';
-    r2_to_node::Vector{Float64} = sum(r_to_node_xy.^2, dims=1) .+ epsilon;
-    return sum(gauss_weights .* 1 ./ r2_to_node .* dr);
-end
+# actually, 2 points' precision is enough
+# const gauss_points::Vector{Float64} = [-1/sqrt(3), 1/sqrt(3)] ./ 2 .+ 1/2;
+# const gauss_weights::Vector{Float64} = [1., 1.] ./ 2;
+const gauss_points::Vector{Float64} = [-0.8611363115940526, -0.33998104358485626, 0.33998104358485626, 0.8611363115940526] ./ 2 .+ 1/2;
+const gauss_weights::Vector{Float64} = [0.34785484513745385, 0.6521451548625461, 0.6521451548625461, 0.34785484513745385] ./ 2;
 
 function calBoundaryContributions(
     x, y,
     boundary::Boundary
-)
+)::Tuple{Float64, Float64}
     # nodal part
     distances2::Vector{Float64} = distance2.(boundary.xy[:, 1], boundary.xy[:, 2], x, y);
     nodal_psi_J_s::Vector{Float64} = 1 ./ (distances2 .+ epsilon) .* boundary.nodal_psis;
@@ -170,15 +157,15 @@ function calBoundaryContributions(
         i_edge_next::Int64 = mod1(i_edge + 1, boundary.n_edges);
         x_1::Float64, y_1::Float64 = boundary.xy[i_edge, :];
         x_2::Float64, y_2::Float64 = boundary.xy[i_edge_next, :];
-        s1::Float64 = boundary.nodal_sources[i_edge];
-        s2::Float64 = boundary.nodal_sources[i_edge_next];
+        s_1::Float64 = boundary.nodal_sources[i_edge];
+        s_2::Float64 = boundary.nodal_sources[i_edge_next];
         # calculate linear integral using gauss quadrature
         dr::Vector{Float64} = [x_2 - x_1, y_2 - y_1];
         r_at_gauss_points::Matrix{Float64} = [x_1, y_1]' .+ gauss_points .* dr';
         r_to_xy_at_gauss_points::Matrix{Float64} = r_at_gauss_points .- [x, y]';
-        ds::Float64 = s2 - s1;
-        s_at_gauss_points::Vector{Float64} = gauss_points .* ds .+ s1;
-        r2_inv_at_gauss_points::Vector{Float64} = 1 ./ (sum(r_to_xy_at_gauss_points.^2, dims=1)[:,] .+ epsilon);
+        ds::Float64 = s_2 - s_1;
+        s_at_gauss_points::Vector{Float64} = gauss_points .* ds .+ s_1;
+        r2_inv_at_gauss_points::Vector{Float64} = 1 ./ (sum(r_to_xy_at_gauss_points.^2, dims=2)[:,] .+ epsilon);
         linear_psi_J_s[i_edge] = gauss_weights' * r2_inv_at_gauss_points .* boundary.linear_psis[i_edge];
         linear_psi_I_s[i_edge] = gauss_weights' * (r2_inv_at_gauss_points .* s_at_gauss_points) .* boundary.linear_psis[i_edge];
     end
@@ -186,7 +173,8 @@ function calBoundaryContributions(
     linear_sum_psi_I::Float64 = sum(linear_psi_I_s);
     sum_psi_J::Float64 = nodal_sum_psi_J + linear_sum_psi_J;
     sum_psi_I::Float64 = nodal_sum_psi_I + linear_sum_psi_I;
-    return sum_psi_J, sum_psi_I;
+    # return sum_psi_J, sum_psi_I;
+    return linear_sum_psi_J, linear_sum_psi_I;
 end
 
 export  Boundary,
