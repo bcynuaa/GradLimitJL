@@ -112,14 +112,14 @@ function createSquareBoundary(
     xy[1:n_nodes_per_side-1, 1] .= LinRange(0., side_len-per_edge_len, n_nodes_per_side-1);
     xy[1:n_nodes_per_side-1, 2] .= 0.;
     # side 2
-    xy[n_nodes_per_side:2*(n_nodes_per_side-1), 1] .= side_len;
-    xy[n_nodes_per_side:2*(n_nodes_per_side-1), 2] .= LinRange(0., side_len-per_edge_len, n_nodes_per_side-1);
+    xy[n_nodes_per_side:2*n_nodes_per_side-2, 1] .= side_len;
+    xy[n_nodes_per_side:2*n_nodes_per_side-2, 2] .= LinRange(0., side_len-per_edge_len, n_nodes_per_side-1);
     # side 3
-    xy[2*(n_nodes_per_side-1)+1:3*(n_nodes_per_side-1), 1] .= LinRange(side_len, per_edge_len, n_nodes_per_side-1);
-    xy[2*(n_nodes_per_side-1)+1:3*(n_nodes_per_side-1), 2] .= side_len;
+    xy[2*n_nodes_per_side-1:3*n_nodes_per_side-3, 1] .= LinRange(side_len, per_edge_len, n_nodes_per_side-1);
+    xy[2*n_nodes_per_side-1:3*n_nodes_per_side-3, 2] .= side_len;
     # side 4
-    xy[3*(n_nodes_per_side-1)+1:4*(n_nodes_per_side-1), 1] .= 0.;
-    xy[3*(n_nodes_per_side-1)+1:4*(n_nodes_per_side-1), 2] .= LinRange(side_len-per_edge_len, 0., n_nodes_per_side-1);
+    xy[3*n_nodes_per_side-2:4*n_nodes_per_side-4, 1] .= 0.;
+    xy[3*n_nodes_per_side-2:4*n_nodes_per_side-4, 2] .= LinRange(side_len, per_edge_len, n_nodes_per_side-1);
     # shift to left bottom
     xy[:, 1] .+= left_bottom_xy[1];
     xy[:, 2] .+= left_bottom_xy[2];
@@ -135,10 +135,15 @@ function createSquareBoundary(
 end
 
 # actually, 2 points' precision is enough
+# 2points, 5order precision
 # const gauss_points::Vector{Float64} = [-1/sqrt(3), 1/sqrt(3)] ./ 2 .+ 1/2;
 # const gauss_weights::Vector{Float64} = [1., 1.] ./ 2;
-const gauss_points::Vector{Float64} = [-0.8611363115940526, -0.33998104358485626, 0.33998104358485626, 0.8611363115940526] ./ 2 .+ 1/2;
-const gauss_weights::Vector{Float64} = [0.34785484513745385, 0.6521451548625461, 0.6521451548625461, 0.34785484513745385] ./ 2;
+# 4points, 7
+# const gauss_points::Vector{Float64} = [-0.8611363115940526, -0.33998104358485626, 0.33998104358485626, 0.8611363115940526] ./ 2 .+ 1/2;
+# const gauss_weights::Vector{Float64} = [0.34785484513745385, 0.6521451548625461, 0.6521451548625461, 0.34785484513745385] ./ 2;
+# 5points, 9order precision
+const gauss_points::Vector{Float64} = [-0.906179845938664, -0.5384693101056831, 0., 0.5384693101056831, 0.906179845938664] ./ 2 .+ 1/2;
+const gauss_weights::Vector{Float64} = [0.23692688505618908, 0.47862867049936647, 0.5688888888888889, 0.47862867049936647, 0.23692688505618908] ./ 2;
 
 function calBoundaryContributions(
     x, y,

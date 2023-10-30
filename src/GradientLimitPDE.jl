@@ -59,6 +59,6 @@ end
 
 export GradientLimitPDE, solve;
 export Boundary, UniformSquareGrid;
-export createCircleBoundary, createSquareBoundary;
+export createCircleBoundary, createSquareBoundary, calBoundaryContributions;
 
 end # module GradientLimitPDEModule
