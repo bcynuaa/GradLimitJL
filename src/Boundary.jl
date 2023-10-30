@@ -31,12 +31,13 @@ end
 
 function Boundary(
     n_nodes::Int64,
-    xy::Matrix{Float64},
+    xy,
     nodal_sources,
     nodal_psi_s,
     linear_psi_s
 )::Boundary
     n_edges::Int64 = n_nodes;
+    xy = Matrix(xy);
     edge_lens::Vector{Float64} = zeros(n_edges);
     for i_node::Int64 = 1: n_nodes;
         i_node_next::Int64 = mod1(i_node + 1, n_nodes);
@@ -64,7 +65,7 @@ end
 function createCircleBoundary(
     n_nodes::Int64,
     radius::Float64,
-    center_xy::Vector{Float64},
+    center_xy,
     nodal_sources,
     nodal_psi_s,
     linear_psi_s
@@ -92,7 +93,7 @@ end
 function createSquareBoundary(
     n_nodes_per_side::Int64,
     side_len::Float64,
-    left_bottom_xy::Vector{Float64},
+    left_bottom_xy,
     nodal_sources,
     nodal_psi_s,
     linear_psi_s

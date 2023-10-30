@@ -31,7 +31,7 @@ function index2DToIndex1D(i::Int64, j::Int64, n::Int64)::Int64
     return (i-1) * n + j;
 end
 
-function UniformSquareGrid(xy0::Vector{Float64}, side_len::Float64, n::Int64, boundary_values)::UniformSquareGrid
+function UniformSquareGrid(xy0, side_len::Float64, n::Int64, boundary_values)::UniformSquareGrid
     delta::Float64 = side_len / (n-1);
     boundary_values = zeros(4 * (n-1)) .+ boundary_values;
     x_s::Vector{Float64} =  LinRange(0, side_len, n) .+ xy0[1];
