@@ -25,16 +25,16 @@ struct Boundary
     xy::Matrix{Float64}
     edge_lens::Vector{Float64}
     nodal_sources::Vector{Float64}
-    nodal_psis::Vector{Float64}
-    linear_psis::Vector{Float64}
+    nodal_psi_s::Vector{Float64}
+    linear_psi_s::Vector{Float64}
 end
 
 function Boundary(
     n_nodes::Int64,
     xy::Matrix{Float64},
     nodal_sources,
-    nodal_psis,
-    linear_psis
+    nodal_psi_s,
+    linear_psi_s
 )::Boundary
     n_edges::Int64 = n_nodes;
     edge_lens::Vector{Float64} = zeros(n_edges);
@@ -48,16 +48,16 @@ function Boundary(
         );
     end
     nodal_sources::Vector{Float64} = zeros(n_nodes) .+ nodal_sources;
-    nodal_psis::Vector{Float64} = zeros(n_nodes) .+ nodal_psis;
-    linear_psis::Vector{Float64} = zeros(n_edges) .+ linear_psis;
+    nodal_psi_s::Vector{Float64} = zeros(n_nodes) .+ nodal_psi_s;
+    linear_psi_s::Vector{Float64} = zeros(n_edges) .+ linear_psi_s;
     return Boundary(
         n_nodes,
         n_edges,
         xy,
         edge_lens,
         nodal_sources,
-        nodal_psis,
-        linear_psis
+        nodal_psi_s,
+        linear_psi_s
     );
 end
 
@@ -66,8 +66,8 @@ function createCircleBoundary(
     radius::Float64,
     center_xy::Vector{Float64},
     nodal_sources,
-    nodal_psis,
-    linear_psis
+    nodal_psi_s,
+    linear_psi_s
 )::Boundary
     theta::Vector{Float64} = Vector(range(0, stop=2*pi, length=n_nodes+1)[1:n_nodes]);
     xy::Matrix{Float64} = zeros(n_nodes, dim);
@@ -76,49 +76,49 @@ function createCircleBoundary(
     n_edges::Int64 = n_nodes;
     edge_lens::Vector{Float64} = zeros(n_nodes) .+ 2*radius*sin(pi/n_nodes);
     nodal_sources::Vector{Float64} = zeros(n_nodes) .+ nodal_sources;
-    nodal_psis::Vector{Float64} = zeros(n_nodes) .+ nodal_psis;
-    linear_psis::Vector{Float64} = zeros(n_nodes) .+ linear_psis;
+    nodal_psi_s::Vector{Float64} = zeros(n_nodes) .+ nodal_psi_s;
+    linear_psi_s::Vector{Float64} = zeros(n_nodes) .+ linear_psi_s;
     return Boundary(
         n_nodes,
         n_edges,
         xy,
         edge_lens,
         nodal_sources,
-        nodal_psis,
-        linear_psis
+        nodal_psi_s,
+        linear_psi_s
     );
 end
 
 function createSquareBoundary(
     n_nodes_per_side::Int64,
-    side_length::Float64,
+    side_len::Float64,
     left_bottom_xy::Vector{Float64},
     nodal_sources,
-    nodal_psis,
-    linear_psis
+    nodal_psi_s,
+    linear_psi_s
 )::Boundary
     n_nodes::Int64 = 4 * (n_nodes_per_side-1);
     n_edges::Int64 = n_nodes;
     xy::Matrix{Float64} = zeros(n_nodes, dim);
     edge_lens::Vector{Float64} = zeros(n_nodes);
     nodal_sources::Vector{Float64} = zeros(n_nodes) .+ nodal_sources;
-    nodal_psis::Vector{Float64} = zeros(n_nodes) .+ nodal_psis;
-    linear_psis::Vector{Float64} = zeros(n_nodes) .+ linear_psis;
-    per_edge_len::Float64 = side_length / (n_nodes_per_side - 1);
+    nodal_psi_s::Vector{Float64} = zeros(n_nodes) .+ nodal_psi_s;
+    linear_psi_s::Vector{Float64} = zeros(n_nodes) .+ linear_psi_s;
+    per_edge_len::Float64 = side_len / (n_nodes_per_side - 1);
     edge_lens .= per_edge_len;
     # allocate nodes anticlockwise around square from left bottom
     # side 1
-    xy[1:n_nodes_per_side-1, 1] .= LinRange(0., side_length-per_edge_len, n_nodes_per_side-1);
+    xy[1:n_nodes_per_side-1, 1] .= LinRange(0., side_len-per_edge_len, n_nodes_per_side-1);
     xy[1:n_nodes_per_side-1, 2] .= 0.;
     # side 2
-    xy[n_nodes_per_side:2*(n_nodes_per_side-1), 1] .= side_length;
-    xy[n_nodes_per_side:2*(n_nodes_per_side-1), 2] .= LinRange(0., side_length-per_edge_len, n_nodes_per_side-1);
+    xy[n_nodes_per_side:2*(n_nodes_per_side-1), 1] .= side_len;
+    xy[n_nodes_per_side:2*(n_nodes_per_side-1), 2] .= LinRange(0., side_len-per_edge_len, n_nodes_per_side-1);
     # side 3
-    xy[2*(n_nodes_per_side-1)+1:3*(n_nodes_per_side-1), 1] .= LinRange(side_length, per_edge_len, n_nodes_per_side-1);
-    xy[2*(n_nodes_per_side-1)+1:3*(n_nodes_per_side-1), 2] .= side_length;
+    xy[2*(n_nodes_per_side-1)+1:3*(n_nodes_per_side-1), 1] .= LinRange(side_len, per_edge_len, n_nodes_per_side-1);
+    xy[2*(n_nodes_per_side-1)+1:3*(n_nodes_per_side-1), 2] .= side_len;
     # side 4
     xy[3*(n_nodes_per_side-1)+1:4*(n_nodes_per_side-1), 1] .= 0.;
-    xy[3*(n_nodes_per_side-1)+1:4*(n_nodes_per_side-1), 2] .= LinRange(side_length-per_edge_len, 0., n_nodes_per_side-1);
+    xy[3*(n_nodes_per_side-1)+1:4*(n_nodes_per_side-1), 2] .= LinRange(side_len-per_edge_len, 0., n_nodes_per_side-1);
     # shift to left bottom
     xy[:, 1] .+= left_bottom_xy[1];
     xy[:, 2] .+= left_bottom_xy[2];
@@ -128,8 +128,8 @@ function createSquareBoundary(
         xy,
         edge_lens,
         nodal_sources,
-        nodal_psis,
-        linear_psis
+        nodal_psi_s,
+        linear_psi_s
     );
 end
 
@@ -145,7 +145,7 @@ function calBoundaryContributions(
 )::Tuple{Float64, Float64}
     # nodal part
     distances2::Vector{Float64} = distance2.(boundary.xy[:, 1], boundary.xy[:, 2], x, y);
-    nodal_psi_J_s::Vector{Float64} = 1 ./ (distances2 .+ epsilon) .* boundary.nodal_psis;
+    nodal_psi_J_s::Vector{Float64} = 1 ./ (distances2 .+ epsilon) .* boundary.nodal_psi_s;
     nodal_psi_I_s::Vector{Float64} = nodal_psi_J_s .* boundary.nodal_sources;
     nodal_sum_psi_J::Float64 = sum(nodal_psi_J_s);
     nodal_sum_psi_I::Float64 = sum(nodal_psi_I_s);
@@ -166,15 +166,14 @@ function calBoundaryContributions(
         ds::Float64 = s_2 - s_1;
         s_at_gauss_points::Vector{Float64} = gauss_points .* ds .+ s_1;
         r2_inv_at_gauss_points::Vector{Float64} = 1 ./ (sum(r_to_xy_at_gauss_points.^2, dims=2)[:,] .+ epsilon);
-        linear_psi_J_s[i_edge] = gauss_weights' * r2_inv_at_gauss_points .* boundary.linear_psis[i_edge];
-        linear_psi_I_s[i_edge] = gauss_weights' * (r2_inv_at_gauss_points .* s_at_gauss_points) .* boundary.linear_psis[i_edge];
+        linear_psi_J_s[i_edge] = gauss_weights' * r2_inv_at_gauss_points .* boundary.linear_psi_s[i_edge];
+        linear_psi_I_s[i_edge] = gauss_weights' * (r2_inv_at_gauss_points .* s_at_gauss_points) .* boundary.linear_psi_s[i_edge];
     end
     linear_sum_psi_J::Float64 = sum(linear_psi_J_s);
     linear_sum_psi_I::Float64 = sum(linear_psi_I_s);
     sum_psi_J::Float64 = nodal_sum_psi_J + linear_sum_psi_J;
     sum_psi_I::Float64 = nodal_sum_psi_I + linear_sum_psi_I;
-    # return sum_psi_J, sum_psi_I;
-    return linear_sum_psi_J, linear_sum_psi_I;
+    return sum_psi_J, sum_psi_I;
 end
 
 export  Boundary,
