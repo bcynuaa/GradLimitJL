@@ -24,7 +24,7 @@ positionAt = GradientLimitPDEJulia.positionAt
 positionsAt = GradientLimitPDEJulia.positionsAt
 
 def GradientLimitPDE(background_grid, boundarys):
-    return GradientLimitPDEJulia.GradientLimitPDE(background_grid, JuliaVector(boundarys))
+    return GradientLimitPDEJulia.GradientLimitPDE(background_grid, boundarys[0], boundarys[1])
     pass
 
 def solve(gradient_limit_pde):
