@@ -134,11 +134,18 @@ function createSquareBoundary(
     );
 end
 
+# gauss quadrature
+# 2points, 1order precision
+# const gauss_points::Vector{Float64} = [0., 1.];
+# const gauss_weights::Vector{Float64} = [0.5, 0.5];
 # actually, 2 points' precision is enough
-# 2points, 5order precision
+# 2points, 3order precision
 # const gauss_points::Vector{Float64} = [-1/sqrt(3), 1/sqrt(3)] ./ 2 .+ 1/2;
 # const gauss_weights::Vector{Float64} = [1., 1.] ./ 2;
-# 4points, 7
+# 3points, 5order precision
+# const gauss_points::Vector{Float64} = [-sqrt(3/5), 0., sqrt(3/5)] ./ 2 .+ 1/2;
+# const gauss_weights::Vector{Float64} = [5/9, 8/9, 5/9] ./ 2;
+# 4points, 7order precision
 # const gauss_points::Vector{Float64} = [-0.8611363115940526, -0.33998104358485626, 0.33998104358485626, 0.8611363115940526] ./ 2 .+ 1/2;
 # const gauss_weights::Vector{Float64} = [0.34785484513745385, 0.6521451548625461, 0.6521451548625461, 0.34785484513745385] ./ 2;
 # 5points, 9order precision
