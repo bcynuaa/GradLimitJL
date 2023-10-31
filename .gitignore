@@ -1,1 +1,4 @@
 *.pyc
+mats/
+datasets/
+datas/
