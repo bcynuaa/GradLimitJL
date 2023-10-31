@@ -66,11 +66,10 @@ function solve(gradient_limit_pde::GradientLimitPDE)::Matrix{Float64}
         gradient_limit_pde.background_grid.n,
         gradient_limit_pde.background_grid.n
     );
-    known_index_s::Vector{Int64} = gradient_limit_pde.background_grid.known_index_s;
-    additional_known_index_s::Vector{Int64} = Int64[];
-    additional_known_value_s::Vector{Float64} = Float64[];
-    for i_row = 2: gradient_limit_pde.background_grid.n-1
-        for j_col = 2: gradient_limit_pde.background_grid.n-1
+    known_index_s::Vector{Int64} = Int64[];
+    known_value_s::Vector{Float64} = Float64[];
+    for i_row = 1: gradient_limit_pde.background_grid.n
+        for j_col = 1: gradient_limit_pde.background_grid.n
             x_pos, y_pos = positionAt(i_row, j_col, gradient_limit_pde.background_grid);
             # inner_boundary part
             sum_psi_J, sum_psi_I = calBoundaryContributions(x_pos, y_pos, gradient_limit_pde.inner_boundary);
@@ -81,19 +80,20 @@ function solve(gradient_limit_pde::GradientLimitPDE)::Matrix{Float64}
             sum_psi_J_at_nodes[i_row, j_col] += sum_psi_J;
             sum_psi_I_s_at_nodes[i_row, j_col] += sum_psi_I;
             if nodeInsideBoundary(x_pos, y_pos, gradient_limit_pde.inner_boundary)
-                push!(additional_known_index_s, i_row + (j_col-1)*gradient_limit_pde.background_grid.n);
-                push!(additional_known_value_s, sum_psi_I_s_at_nodes[i_row, j_col] / sum_psi_J_at_nodes[i_row, j_col]);
+                push!(known_index_s, i_row + (j_col-1)*gradient_limit_pde.background_grid.n);
+                push!(known_value_s, sum_psi_I_s_at_nodes[i_row, j_col] / sum_psi_J_at_nodes[i_row, j_col]);
+            elseif (i_row + (j_col-1)*gradient_limit_pde.background_grid.n) in gradient_limit_pde.background_grid.known_index_s
+                push!(known_index_s, i_row + (j_col-1)*gradient_limit_pde.background_grid.n);
+                push!(known_value_s, sum_psi_I_s_at_nodes[i_row, j_col] / sum_psi_J_at_nodes[i_row, j_col]);
             end
         end
     end
-    known_index_s = vcat(known_index_s, additional_known_index_s);
-    known_index_values = vcat(gradient_limit_pde.background_grid.boundary_values, additional_known_value_s);
     unknown_index_s = setdiff(1: gradient_limit_pde.background_grid.n^2, known_index_s);
     M_diag::Vector{Float64} = vec(sum_psi_J_at_nodes);
     A_mat::SparseMatrixCSC{Float64, Int64} = gradient_limit_pde.background_grid.laplacian_operator - spdiagm(0 => M_diag);
     f_vec::Vector{Float64} = -vec(sum_psi_I_s_at_nodes);
     result::Vector{Float64} = zeros(gradient_limit_pde.background_grid.n^2);
-    result[known_index_s] .= known_index_values;
+    result[known_index_s] .= known_value_s;
     f_vec .-= A_mat * result;
     result[unknown_index_s] .= begin
     A_mat[unknown_index_s, unknown_index_s] \ f_vec[unknown_index_s];
