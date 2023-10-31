@@ -72,23 +72,18 @@ function solve(gradient_limit_pde::GradientLimitPDE)::Matrix{Float64}
     for i_row = 2: gradient_limit_pde.background_grid.n-1
         for j_col = 2: gradient_limit_pde.background_grid.n-1
             x_pos, y_pos = positionAt(i_row, j_col, gradient_limit_pde.background_grid);
-            # for boundary in gradient_limit_pde.boundarys
-            #     sum_psi_J, sum_psi_I = calBoundaryContributions(x_pos, y_pos, boundary);
-            #     sum_psi_J_at_nodes[i_row, j_col] += sum_psi_J;
-            #     sum_psi_I_s_at_nodes[i_row, j_col] += sum_psi_I;
-            # end
             # inner_boundary part
             sum_psi_J, sum_psi_I = calBoundaryContributions(x_pos, y_pos, gradient_limit_pde.inner_boundary);
             sum_psi_J_at_nodes[i_row, j_col] += sum_psi_J;
             sum_psi_I_s_at_nodes[i_row, j_col] += sum_psi_I;
-            if nodeInsideBoundary(x_pos, y_pos, gradient_limit_pde.inner_boundary)
-                push!(additional_known_index_s, i_row + (j_col-1)*gradient_limit_pde.background_grid.n);
-                push!(additional_known_value_s, sum_psi_I / sum_psi_J);
-            end
             # outer_boundary part
             sum_psi_J, sum_psi_I = calBoundaryContributions(x_pos, y_pos, gradient_limit_pde.outer_boundary);
             sum_psi_J_at_nodes[i_row, j_col] += sum_psi_J;
             sum_psi_I_s_at_nodes[i_row, j_col] += sum_psi_I;
+            if nodeInsideBoundary(x_pos, y_pos, gradient_limit_pde.inner_boundary)
+                push!(additional_known_index_s, i_row + (j_col-1)*gradient_limit_pde.background_grid.n);
+                push!(additional_known_value_s, sum_psi_I_s_at_nodes[i_row, j_col] / sum_psi_J_at_nodes[i_row, j_col]);
+            end
         end
     end
     known_index_s = vcat(known_index_s, additional_known_index_s);
